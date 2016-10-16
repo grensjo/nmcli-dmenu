@@ -202,9 +202,9 @@ def create_ap_actions(aps, active_ap, active_connection):
     active_ap_bssid = active_ap.get_bssid() if active_ap is not None else ""
 
     names = [ssid_to_utf8(ap) for ap in aps]
-    max_len_name = max([len(name) for name in names])
+    max_len_name = max([len(name) for name in names]) if names else 0
     secs = [ap_security(ap) for ap in aps]
-    max_len_sec = max([len(sec) for sec in secs])
+    max_len_sec = max([len(sec) for sec in secs]) if secs else 0
 
     ap_actions = []
 
