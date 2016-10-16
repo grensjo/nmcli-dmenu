@@ -87,8 +87,7 @@ def choose_adapter(client):
 
     """
     devices = client.get_devices()
-    devices = list(filter(lambda d: d.get_device_type() == NM.DeviceType.WIFI,
-                          devices))
+    devices = [i for i in devices if i.get_device_type() == NM.DeviceType.WIFI]
     if len(devices) == 0:
         return None
     elif len(devices) == 1:
@@ -100,7 +99,7 @@ def choose_adapter(client):
                 env=ENV).communicate(input=device_names)[0].decode(ENC)
     if not sel.strip():
         sys.exit()
-    devices = filter(lambda d: d.get_iface() == sel.strip(), devices)
+    devices = [i for i in devices if i.get_iface() == sel.strip()]
     assert len(devices) == 1
     return devices[0]
 
@@ -225,14 +224,14 @@ def create_ap_actions(aps, active_ap, active_connection):
 
 
 def create_vpn_actions(vpns, active):
-    active_vpns = list(filter(lambda a: a.get_vpn(), active))
+    active_vpns = [i for i in active if i.get_vpn()]
     return _create_vpngsm_actions(vpns, active_vpns, "VPN")
 
 
 # TODO: Test this
 def create_gsm_actions(gsms, active):
-    active_gsms = list(filter(lambda a: a.get_connection()
-                              .is_type(NM.SETTING_GSM_SETTING_NAME), active))
+    active_gsms = [i for i in active if
+                   i.get_connection().is_type(NM.SETTING_GSM_SETTING_NAME)]
     return _create_vpngsm_actions(gsms, active_gsms, "GSM")
 
 
@@ -289,9 +288,9 @@ def get_selection(client, aps, vpns, gsms, others):
     if not sel.rstrip():
         sys.exit()
 
-    action = list(filter(lambda x: str(x) == sel.rstrip("\n"),
-                         aps + vpns + gsms + others))
-    assert len(action) == 1, "Selection was ambiguous: %s" % str(sel)
+    action = [i for i in aps + vpns + gsms + others
+              if str(i) == sel.rstrip("\n")]
+    assert len(action) == 1, "Selection was ambiguous: {}".format(str(sel))
     return action[0]
 
 
@@ -398,9 +397,9 @@ def run():
         aps = sorted(adapter.get_access_points(),
                      key=lambda a: a.get_strength(), reverse=True)
         active_ap = adapter.get_active_access_point()
-        active_ap_con = list(filter(lambda con: con.get_connection_type() ==
-                                    NM.SETTING_WIRELESS_SETTING_NAME, active))
-        print(active_ap_con)
+        active_ap_con = [i for i in active if
+                         i.get_connection_type() ==
+                         NM.SETTING_WIRELESS_SETTING_NAME]
         if len(active_ap_con) > 1:
             raise ValueError("Multiple connections match"
                              " the wireless connection")
@@ -409,10 +408,8 @@ def run():
     else:
         ap_actions = []
 
-    vpns = list(filter(lambda c: c.is_type(NM.SETTING_VPN_SETTING_NAME),
-                       conns))
-    gsms = list(filter(lambda c: c.is_type(NM.SETTING_GSM_SETTING_NAME),
-                       conns))
+    vpns = [i for i in conns if i.is_type(NM.SETTING_VPN_SETTING_NAME)]
+    gsms = [i for i in conns if i.is_type(NM.SETTING_GSM_SETTING_NAME)]
 
     vpn_actions = create_vpn_actions(vpns, active)
     gsm_actions = create_gsm_actions(gsms, active)
