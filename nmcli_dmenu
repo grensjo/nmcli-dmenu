@@ -47,6 +47,7 @@ def dmenu_cmd(num_lines, prompt="Networks"):
     if not conf:
         res = [dmenu_command, "-i", "-l", str(num_lines), "-p", str(prompt)]
     else:
+        num_lines_str = str(num_lines)
         args_dict = dict(args)
         dmenu_args = []
         if "dmenu_command" in args_dict:
@@ -60,13 +61,14 @@ def dmenu_cmd(num_lines, prompt="Networks"):
         elif "p" in args_dict:
             del args_dict["p"]
         if "rofi" in dmenu_command:
-            lines = "-i -dmenu -lines"
+            lines = "-i -dmenu"
+            num_lines_str = ""
         else:
             lines = "-i -l"
         if "pinentry" in args_dict:
             del args_dict["pinentry"]
         extras = (["-" + str(k), str(v)] for (k, v) in args_dict.items())
-        res = [dmenu_command, str(num_lines), "-p", str(prompt)]
+        res = [dmenu_command, num_lines_str, "-p", str(prompt)]
         res.extend(dmenu_args)
         res += list(itertools.chain.from_iterable(extras))
         res[1:1] = lines.split()
